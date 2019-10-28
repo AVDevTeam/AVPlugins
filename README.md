@@ -1,0 +1,2 @@
+# AVPlugins
+Plugins for AVCore
