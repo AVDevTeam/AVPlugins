@@ -1,5 +1,4 @@
 #pragma once
-#pragma once
 #include "PluginInterface.h"
 #include "EventsUMInterfaces.h"
 
@@ -14,7 +13,7 @@ class AVShield : public IPlugin
 public:
 	// Inherited via IPlugin
 	virtual ~AVShield() override;
-	AV_EVENT_RETURN_STATUS callback(int, void*) override;
+	AV_EVENT_RETURN_STATUS callback(int, void*, void**) override;
 	void init(IManager* manager, HMODULE module, IConfig* configManager) override;
 	void deinit() override;
 

@@ -5,7 +5,7 @@ AVShield::~AVShield()
 {
 }
 
-AV_EVENT_RETURN_STATUS AVShield::callback(int callbackId, void* event)
+AV_EVENT_RETURN_STATUS AVShield::callback(int callbackId, void* event, void** umMessage)
 {
 	if (callbackId == CallbackFileCreate)
 	{
