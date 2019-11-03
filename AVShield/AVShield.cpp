@@ -65,9 +65,9 @@ void AVShield::init(IManager* manager, HMODULE module, IConfig* configManager)
 
 	this->configManager->setParamMap(paramMap);
 
-	manager->registerCallback(this, CallbackFileCreate, AvFileCreate, 1);
-	manager->registerCallback(this, CallbackRegCreateKey, AvRegCreateKey, 1);
-	manager->registerCallback(this, CallbackRegOpenKey, AvRegOpenKey, 1);
+	manager->registerCallback(this, CallbackFileCreate, AvFileCreate, 5);
+	manager->registerCallback(this, CallbackRegCreateKey, AvRegCreateKey, 5);
+	manager->registerCallback(this, CallbackRegOpenKey, AvRegOpenKey, 5);
 }
 
 void AVShield::deinit()

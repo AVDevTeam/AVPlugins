@@ -3,9 +3,6 @@
 #include "EventsUMInterfaces.h"
 
 typedef enum {
-	CallbackProcessCreate,
-	CallbackProcessExit,
-	CallbackThreadCreate,
 	CallbackApcProcessInject,
 } CALLBACK_ID;
 
