@@ -81,7 +81,7 @@ AV_EVENT_RETURN_STATUS AVInject::callback(int callbackId, void* event, void** um
 			this->logger->log("Process with PID " + std::to_string(PID) + " created thread " + std::to_string(TID));
 			if (context->getTID() == NULL)
 				context->setTID(TID);
-			if (!context->wasInjected())
+			if (!context->wasInjected() && !context->getWow64())
 			{
 				this->logger->log("START INJECT");
 				(*umMessage) = (void*)context->getApcInfoPtr();
