@@ -14,7 +14,9 @@ AV_EVENT_RETURN_STATUS AVInject::callback(int callbackId, void* event, void** um
 
 		this->logger->log("Injecting dll to " + std::to_string(eventApcProcessInject->getPID()) + " via APC (injdrv)");
 		// send any other Status to block dll injection.
-		return AvEventStatusAllow; // inject
+		if (eventApcProcessInject->getImageFileName().find("cmd") != std::string::npos)
+			return AvEventStatusAllow; // inject
+		return AvEventStatusBlock;
 	}
 	return AvEventStatusAllow;
 }
