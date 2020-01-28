@@ -8,7 +8,7 @@ AV_EVENT_RETURN_STATUS NetworkPlugin::callback(int callbackId, void* event, void
 	if (callbackId == CallbackNetworkPacket)
 	{
 		IEventNetwork* eventNetwork = reinterpret_cast<IEventNetwork*>(event);
-		Rule *rule = this->rules->makeDecision(
+		Rule* rule = this->rules->makeDecision(
 			eventNetwork->getLocalAddressStr(),
 			eventNetwork->getRemoteAddressStr(),
 			eventNetwork->getLocalPort(),
@@ -16,24 +16,6 @@ AV_EVENT_RETURN_STATUS NetworkPlugin::callback(int callbackId, void* event, void
 			eventNetwork->getData(),
 			eventNetwork->getDataLength()
 		);
-
-		//char tmp[1024] = { 0 };
-		//sprintf_s(tmp, 1024, "getData %p, getDataLength %ull", eventNetwork->getData(), eventNetwork->getDataLength());
-		//this->logger->log(tmp);
-
-		//if (eventNetwork->getData() != NULL && eventNetwork->getDataLength() != 0) {
-		//	this->logger->log("\tPacket content ");
-		//	char* dataHex = new char[eventNetwork->getDataLength() * 3 + 1];
-		//	for (int i = 0; i < eventNetwork->getDataLength(); i++) {
-		//		sprintf_s(dataHex + i * 3, (eventNetwork->getDataLength() - i) * 3 + 1, "%02x ", eventNetwork->getData()[i]);
-		//	}
-		//	dataHex[eventNetwork->getDataLength() * 3] = 0;
-		//	this->logger->log(dataHex);
-		//	delete dataHex;
-		//}
-		//else {
-		//	this->logger->log("eventNetwork->getData() != NULL && eventNetwork->getDataLength() != 0");
-		//}
 		
 		char message[1024] = { 0 };
 		switch (rule->getAction())
