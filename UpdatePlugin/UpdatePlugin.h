@@ -38,6 +38,8 @@ public:
 	}
 	virtual std::string& getDescription() override;
 	virtual IConfig* getConfig() override;
+
+	virtual int processCommand(std::string name, std::string args) override;
 private:
 	std::thread worker;
 	std::string name = std::string("UpdatePlugin");
@@ -50,4 +52,5 @@ private:
 	std::mutex updateMutex; // syncronizes deinit with update loop.
 
 	void updateLoop();
+	void doUpdate();
 };

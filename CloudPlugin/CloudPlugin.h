@@ -14,8 +14,14 @@ public:
 
 	virtual std::string& getName() override;
 	virtual HMODULE getModule() override;
+	virtual unsigned int getVersion() override
+	{
+		return 1;
+	}
 	virtual std::string& getDescription() override;
 	virtual IConfig* getConfig() override;
+
+	virtual int processCommand(std::string name, std::string args) override;
 private:
 	std::string name = std::string("CloudPlugin");
 	std::string description = std::string("Just a cloud plugin.");

@@ -23,11 +23,12 @@ public:
 	}
 	virtual std::string& getDescription() override;
 	virtual IConfig* getConfig() override;
+
+	virtual int processCommand(std::string name, std::string args) override;
 private:
 	std::string name = std::string("InjectPlugin");
 	std::string description = std::string("TODO");
 	HMODULE module;
 	IConfig* configManager;
 	ILogger* logger;
-	
 };

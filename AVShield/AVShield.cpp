@@ -14,8 +14,10 @@ AV_EVENT_RETURN_STATUS AVShield::callback(int callbackId, void* event, void** um
 		std::list<std::string>* blocked = this->configManager->getListParam("ProtectedFolders");
 		for (std::list<std::string>::iterator it = blocked->begin(); it != blocked->end(); it++)
 		{
-			if (filePath.find((*it)) != std::string::npos)
+			int pid = eventFSCreate->getRequestorPID();
+			if (filePath.find((*it)) != std::string::npos && pid)
 			{
+				this->logger->log("\tAccess attemp from " + std::to_string(eventFSCreate->getRequestorPID()));
 				this->logger->log("\t" + this->getName() + ": blocked access to protected folder " + (*it));
 				return AvEventStatusBlock;
 			}
@@ -65,6 +67,19 @@ void AVShield::init(IManager* manager, HMODULE module, IConfig* configManager)
 
 	this->configManager->setParamMap(paramMap);
 
+	std::string param = "ProtectedFolders";
+	if (!this->configManager->checkParamSet(param))
+	{
+		std::list<std::string> emptyList;
+		this->configManager->setListParam(param, emptyList);
+	}
+	param = "ProtectedKeys";
+	if (!this->configManager->checkParamSet(param))
+	{
+		std::list<std::string> emptyList;
+		this->configManager->setListParam(param, emptyList);
+	}
+
 	manager->registerCallback(this, CallbackFileCreate, AvFileCreate, 5);
 	manager->registerCallback(this, CallbackRegCreateKey, AvRegCreateKey, 5);
 	manager->registerCallback(this, CallbackRegOpenKey, AvRegOpenKey, 5);
@@ -94,4 +109,9 @@ std::string& AVShield::getDescription()
 IConfig* AVShield::getConfig()
 {
 	return this->configManager;
+}
+
+int AVShield::processCommand(std::string name, std::string args)
+{
+	return 0;
 }

@@ -62,3 +62,8 @@ IConfig* AVInject::getConfig()
 {
 	return this->configManager;
 }
+
+int AVInject::processCommand(std::string name, std::string args)
+{
+	return 0;
+}

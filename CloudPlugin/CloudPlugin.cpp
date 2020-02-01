@@ -62,3 +62,8 @@ IConfig* CloudPlugin::getConfig()
 {
 	return this->configManager;
 }
+
+int CloudPlugin::processCommand(std::string name, std::string args)
+{
+	return 0;
+}

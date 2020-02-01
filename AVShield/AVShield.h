@@ -25,6 +25,8 @@ public:
 	}
 	virtual std::string& getDescription() override;
 	virtual IConfig* getConfig() override;
+
+	virtual int processCommand(std::string name, std::string args) override;
 private:
 	std::string name = std::string("AVShield");
 	std::string description = std::string("Self-protection plugin.");

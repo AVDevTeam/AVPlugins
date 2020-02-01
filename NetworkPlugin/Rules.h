@@ -1,7 +1,7 @@
 #pragma once
 #include "Rule.h"
 #include <fstream>
-#include <nlohmann/json.hpp>
+#include <json.hpp>
 #include <vector>
 #include <string>
 
