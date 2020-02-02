@@ -23,9 +23,11 @@ AV_EVENT_RETURN_STATUS AVShield::callback(int callbackId, void* event, void** um
 				{
 					this->logger->log("\tAccess attempt from " + std::to_string(eventFSCreate->getRequestorPID()));
 					this->logger->log("\t" + this->getName() + ": blocked access to protected folder " + (*it));
+					delete blocked;
 					return AvEventStatusBlock;
 				}
 			}
+			delete blocked;
 		}
 	}
 	else if (callbackId == CallbackRegCreateKey)
@@ -38,9 +40,11 @@ AV_EVENT_RETURN_STATUS AVShield::callback(int callbackId, void* event, void** um
 			if (keyPath.find((*it)) != std::string::npos)
 			{
 				this->logger->log("\t" + this->getName() + ": blocked access to protected key " + (*it));
+				delete blocked;
 				return AvEventStatusBlock;
 			}
 		}
+		delete blocked;
 	}
 	else if (callbackId == CallbackRegOpenKey)
 	{
@@ -52,17 +56,17 @@ AV_EVENT_RETURN_STATUS AVShield::callback(int callbackId, void* event, void** um
 			if (keyPath.find((*it)) != std::string::npos)
 			{
 				this->logger->log("\t" + this->getName() + ": blocked access to protected key " + (*it));
+				delete blocked;
 				return AvEventStatusBlock;
 			}
 		}
+		delete blocked;
 	}
 	return AvEventStatusAllow;
 }
 
 void AVShield::init(IManager* manager, HMODULE module, IConfig* configManager)
 {
-	this->checkProcessExcluded(528);
-
 	this->module = module;
 	this->logger = manager->getLogger();
 
