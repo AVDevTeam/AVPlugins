@@ -5,22 +5,6 @@
 #include "json.hpp"
 #include <thread>
 
-typedef enum {
-	CallbackFileCreate,
-	CallbackPrHandleCreate,
-	CallbackPrHandleDublicate,
-	CallbackThHandleCreate,
-	CallbackThHandleDublicate,
-	CallbackProcessCreate,
-	CallbackProcessExit,
-	CallbackThreadCreate,
-	CallbackThreadExit,
-	CallbackImageLoad,
-	CallbackRegCreateKey,
-	CallbackRegOpenKey,
-	CallbackWinApiCall,
-} CALLBACK_ID;
-
 class UpdatePlugin : public IPlugin
 {
 public:
