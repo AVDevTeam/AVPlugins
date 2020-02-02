@@ -99,3 +99,13 @@ IConfig* NetworkPlugin::getConfig()
 {
 	return this->configManager;
 }
+
+int NetworkPlugin::processCommand(std::string name, std::string args)
+{
+	return 0;
+}
+
+unsigned int NetworkPlugin::getVersion()
+{
+	return 1;
+}

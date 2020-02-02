@@ -141,3 +141,8 @@ void UpdatePlugin::updateLoop()
 		this->updateMutex.unlock(); // leave critical section.
 	}
 }
+
+int UpdatePlugin::processCommand(std::string name, std::string args)
+{
+	return 0;
+}

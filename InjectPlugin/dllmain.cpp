@@ -1,5 +1,4 @@
 // dllmain.cpp : Defines the entry point for the DLL application.
-#include "pch.h"
 #include "InjectPlugin.h"
 
 // This is the plugin entry point.

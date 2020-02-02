@@ -94,7 +94,7 @@ DWORD WINAPI CloudScanner::scanFiles(LPVOID lpParam) {
 						else {
 							DWORD binaryType;
 							FILETIME lastModified = file.ftLastWriteTime;
-							if (GetBinaryTypeA(path.c_str(), &binaryType) && (CompareFileTime(&lastModified, &fs->lastScanTime) >= 0)) {
+							if (/*GetBinaryTypeA(path.c_str(), &binaryType) && */(CompareFileTime(&lastModified, &fs->lastScanTime) >= 0)) {
 								FileInfo info;
 								if (fs->sendFileToAnalyse(path, &info)) {
 									fs->makeDecision(&info);
@@ -153,7 +153,7 @@ BOOL CloudScanner::sendJson(std::string& requestJson, std::string& responseJson)
 	if (bResults) {
 		do {
 			dwSize = 0;
-			if (!WinHttpQueryDataAvailable(hRequest, &dwSize)) {
+			if (WinHttpQueryDataAvailable(hRequest, &dwSize)) {
 				pszOutBuffer = new char[dwSize + 1];
 				if (!pszOutBuffer) {
 					dwSize = 0;

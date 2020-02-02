@@ -50,4 +50,7 @@ private:
 	std::mutex updateMutex; // syncronizes deinit with update loop.
 
 	void updateLoop();
+
+	// Inherited via IPlugin
+	virtual int processCommand(std::string name, std::string args) override;
 };

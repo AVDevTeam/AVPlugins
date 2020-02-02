@@ -32,7 +32,7 @@ void CloudPlugin::init(IManager* manager, HMODULE module, IConfig* config)
 		this->logger->log(s);
 	this->logger->log(filesScanned);
 	cloudScanner = new CloudScanner(scanPaths, filesScanned, scanPeriod, cuckooScanPeriod, this->logger);
-	cloudScanner->run();
+	//cloudScanner->run();
 }
 
 void CloudPlugin::deinit()
@@ -61,4 +61,14 @@ std::string& CloudPlugin::getDescription()
 IConfig* CloudPlugin::getConfig()
 {
 	return this->configManager;
+}
+
+unsigned int CloudPlugin::getVersion()
+{
+	return 0;
+}
+
+int CloudPlugin::processCommand(std::string name, std::string args) {
+	this->logger->log("CloudPlugin | Command: name (args)");
+	return 0;
 }

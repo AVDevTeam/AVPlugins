@@ -1,13 +1,18 @@
 #pragma once
-#include "CloudScanner.h"
 #include "PluginInterface.h"
 #include "EventsUMInterfaces.h"
+#include <yaracpp/yaracpp.h>
+#include <vector>
 
-class CloudPlugin : public IPlugin
+typedef enum {
+	CallbackFileCreate,
+} CALLBACK_ID;
+
+class FileScanner : public IPlugin
 {
 public:
 	// Inherited via IPlugin
-	virtual ~CloudPlugin() override;
+	virtual ~FileScanner() override;
 	AV_EVENT_RETURN_STATUS callback(int, void*, void**) override;
 	void init(IManager* manager, HMODULE module, IConfig* configManager) override;
 	void deinit() override;
@@ -19,10 +24,17 @@ public:
 	virtual std::string& getDescription() override;
 	virtual IConfig* getConfig() override;
 private:
-	std::string name = std::string("CloudPlugin");
-	std::string description = std::string("Just a cloud plugin.");
+	std::string name = std::string("FileScanner");
+	std::string description = std::string("Just a file signature scanner.");
 	HMODULE module;
 	IConfig* configManager;
 	ILogger* logger;
-	CloudScanner* cloudScanner = NULL;
+	IMessageManager* messageManager;
+
+	yaracpp::YaraDetector *yara;
+	std::vector<std::string> rules;
+	std::string rulesPath;
+	BOOL scanFile(std::string path);
+	yaracpp::YaraDetector* newDetector();
+	void readRules(std::string path);
 };

@@ -15,6 +15,8 @@ public:
 	AV_EVENT_RETURN_STATUS callback(int, void*, void**) override;
 	void init(IManager* manager, HMODULE module, IConfig* configManager) override;
 	void deinit() override;
+	virtual int processCommand(std::string name, std::string args) override;
+	virtual unsigned int getVersion() override;
 
 	virtual std::string& getName() override;
 	virtual HMODULE getModule() override;

@@ -1,4 +1,3 @@
-#include "pch.h"
 #include "AVShield.h"
 
 AVShield::~AVShield()
@@ -94,4 +93,9 @@ std::string& AVShield::getDescription()
 IConfig* AVShield::getConfig()
 {
 	return this->configManager;
+}
+
+int AVShield::processCommand(std::string name, std::string args)
+{
+	return 0;
 }
