@@ -90,6 +90,7 @@ void UpdatePlugin::doUpdate()
 {
 	this->updateMutex.lock(); // enter critical section.
 	std::string serverUrl = this->configManager->getStringParam("server"); // get server URL from parameter
+
 	httplib::Client cli(serverUrl, 80); // connect to server
 	auto res = cli.Get("updates/meta.json"); // load plugin updates list
 	if (res && res->status == 200)
