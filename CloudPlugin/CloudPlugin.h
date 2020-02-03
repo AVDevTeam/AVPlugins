@@ -18,6 +18,7 @@ public:
 	virtual HMODULE getModule() override;
 	virtual std::string& getDescription() override;
 	virtual IConfig* getConfig() override;
+
 private:
 	std::string name = std::string("CloudPlugin");
 	std::string description = std::string("Just a cloud plugin.");

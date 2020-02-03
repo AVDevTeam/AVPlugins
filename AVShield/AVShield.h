@@ -1,6 +1,7 @@
 #pragma once
 #include "PluginInterface.h"
 #include "EventsUMInterfaces.h"
+#include "psapi.h"
 
 typedef enum {
 	CallbackFileCreate,
@@ -26,7 +27,10 @@ public:
 	}
 	virtual std::string& getDescription() override;
 	virtual IConfig* getConfig() override;
+
 private:
+	bool checkProcessExcluded(int pid);
+
 	std::string name = std::string("AVShield");
 	std::string description = std::string("Self-protection plugin.");
 	HMODULE module;

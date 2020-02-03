@@ -5,22 +5,6 @@
 #include "json.hpp"
 #include <thread>
 
-typedef enum {
-	CallbackFileCreate,
-	CallbackPrHandleCreate,
-	CallbackPrHandleDublicate,
-	CallbackThHandleCreate,
-	CallbackThHandleDublicate,
-	CallbackProcessCreate,
-	CallbackProcessExit,
-	CallbackThreadCreate,
-	CallbackThreadExit,
-	CallbackImageLoad,
-	CallbackRegCreateKey,
-	CallbackRegOpenKey,
-	CallbackWinApiCall,
-} CALLBACK_ID;
-
 class UpdatePlugin : public IPlugin
 {
 public:
@@ -38,6 +22,8 @@ public:
 	}
 	virtual std::string& getDescription() override;
 	virtual IConfig* getConfig() override;
+
+	virtual int processCommand(std::string name, std::string args) override;
 private:
 	std::thread worker;
 	std::string name = std::string("UpdatePlugin");
@@ -50,7 +36,5 @@ private:
 	std::mutex updateMutex; // syncronizes deinit with update loop.
 
 	void updateLoop();
-
-	// Inherited via IPlugin
-	virtual int processCommand(std::string name, std::string args) override;
+	void doUpdate();
 };

@@ -1,7 +1,7 @@
 #pragma once
 #include "ipaddress.h"
 #include "PortRange.h"
-#include <nlohmann/json.hpp>
+#include <json.hpp>
 #include <vector>
 #include <string>
 

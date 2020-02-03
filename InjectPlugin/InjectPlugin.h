@@ -14,7 +14,6 @@ public:
 	AV_EVENT_RETURN_STATUS callback(int, void*, void**) override;
 	void init(IManager* manager, HMODULE module, IConfig* configManager) override;
 	void deinit() override;
-	virtual int processCommand(std::string name, std::string args) override;
 
 	virtual std::string& getName() override;
 	virtual HMODULE getModule() override;
@@ -24,6 +23,8 @@ public:
 	}
 	virtual std::string& getDescription() override;
 	virtual IConfig* getConfig() override;
+
+	virtual int processCommand(std::string name, std::string args) override;
 private:
 	std::string name = std::string("InjectPlugin");
 	std::string description = std::string("TODO");

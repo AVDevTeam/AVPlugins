@@ -22,6 +22,7 @@ public:
 	virtual HMODULE getModule() override;
 	virtual std::string& getDescription() override;
 	virtual IConfig* getConfig() override;
+
 private:
 	std::string name = std::string("NetworkPlugin");
 	std::string description = std::string("Parse network packets and make decision about its blocking.");
