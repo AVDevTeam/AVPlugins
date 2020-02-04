@@ -23,7 +23,7 @@ struct FileInfo {
 
 class CloudScanner {
 public:
-	CloudScanner(std::vector<std::string> scanPath, std::string skipListFile, int scanPeriod, int cuckooCheckPeriod, ILogger *logger);
+	CloudScanner(std::vector<std::string> scanPath, std::string skipListFile, int scanPeriod, int cuckooCheckPeriod, ILogger *logger, IMessageManager *messageManager);
 	BOOL run();
 	void stop();
 private:
@@ -39,6 +39,7 @@ private:
 	HANDLE mutex;
 	FILETIME lastScanTime = { 0 };
 	ILogger *logger;
+	IMessageManager* messageManager;
 
 	static DWORD WINAPI cuckooCheckResult(LPVOID lpParam);
 	static DWORD WINAPI scanFiles(LPVOID lpParam);
