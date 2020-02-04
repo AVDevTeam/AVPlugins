@@ -7,7 +7,7 @@
 #include <fstream>
 
 AV_EVENT_RETURN_STATUS FileScanner::callback(int callbackId, void* event, void** umMessage)
-{
+{	
 	if (callbackId == CallbackFileCreate) {
 		IEventFSCreate* eventFSCreate = reinterpret_cast<IEventFSCreate*>(event);
 		scanFile(eventFSCreate->getFilePath());
@@ -20,22 +20,129 @@ BOOL FileScanner::scanFile(std::string path) {
 		if (path.find("C:\\Users\\user\\Documents") != -1 &&
 			path.find("AV") == -1 &&
 			path.find(this->rulesPath) == -1 &&
-			(path.find(".exe") != -1 || path.find(".dll") != -1) &&
-			this->yara->analyze(path) && this->yara->getDetectedRules().size() > 0) {
-			
-			DeleteFileA(path.c_str());
+			(path.find(".exe") != -1 || path.find(".dll") != -1)) {
 
-			std::string message = "detected malware " + path + ", rule " + this->yara->getDetectedRules()[0].getName();
-			this->logger->log(message);
-			this->messageManager->outAlert(message);
-			delete this->yara;
-			this->yara = newDetector();
+			std::lock_guard<std::mutex> lock(this->scanMutex);
+			bool scanResult = (this->yara->analyze(path) && this->yara->getDetectedRules().size() > 0);
+
+			if (scanResult) {
+				std::string message = "AVScanFiles | malware detected | path: \'" + path + "\'  rule: " + this->yara->getDetectedRules()[0].getName();
+				this->logger->log(message);
+				this->messageManager->outAlert(message);
+				delete this->yara;
+				this->yara = newDetector();
+				return TRUE;
+			}
 		}
 	}
 	catch (int e) {
 		this->logger->log("File scan error");
 	}
+	return FALSE;
 }
+
+void FileScanner::scanFiles() {
+	try {
+		while (!this->avDown) {
+			if (this->scannerInited) {
+
+				this->logger->log("FileScanner | start scanning in folders");
+				for (auto p : this->scanPath) {
+					this->logger->log("\t" + std::string(p));
+				}
+				WIN32_FIND_DATAA file;
+				std::stack<std::string, std::vector<std::string>> fstack(this->scanPath);
+				while (!fstack.empty()) {
+					std::string dir = fstack.top();
+					fstack.pop();
+					HANDLE hFile = FindFirstFileA((dir + "\\*").c_str(), &file);
+					if (hFile != INVALID_HANDLE_VALUE) {
+						do {
+							std::string fname = std::string(file.cFileName);
+							std::string path = dir + "\\" + fname;
+							this->logger->log("FileScanner scan " + fname);
+							if (file.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+								if ((fname != ".") && (fname != "..")) {
+									fstack.push(path);
+								}
+							}
+							else {
+								DWORD binaryType;
+								FILETIME lastModified = file.ftLastWriteTime;
+								if (CompareFileTime(&lastModified, &this->lastScanTime) >= 0) {
+									this->scanFile(path);
+								}
+							}
+						} while (FindNextFileA(hFile, &file));
+
+						FindClose(hFile);
+					}
+				}
+				SYSTEMTIME systemTime;
+				GetSystemTime(&systemTime);
+				SystemTimeToFileTime(&systemTime, &this->lastScanTime);
+			}
+			this->waitForScanThread(std::chrono::minutes(this->scanPeriod));
+		}
+	}
+	catch (int e) {
+		this->logger->log("AVCloud | scanFiles exception");
+	}
+}
+
+void FileScanner::addFileToUserVerify(std::string path) {
+	std::unique_lock<std::mutex> lock(this->verifyMutex);
+	this->filesToVerify.push(path);
+	this->verifyNotifier.notify_one();
+}
+
+void FileScanner::verifyFiles() {
+	std::unique_lock<std::mutex> lock(this->verifyMutex);
+	while (!this->avDown) {
+		this->verifyNotifier.wait(lock);
+
+		if (this->filesToVerify.empty()) continue;
+		std::string path = this->filesToVerify.front();
+		this->filesToVerify.pop();
+
+		int res = MessageBoxA(NULL, (std::string("Detected malware. Delete?") + path).c_str(), "Detected malware", MB_YESNO);
+		if (res == IDYES) {
+			DeleteFileA(path.c_str());
+		}
+	}
+}
+
+void FileScanner::shutdownThreads() {
+	{
+		std::lock_guard<std::mutex> l(scanSchedulingMutex);
+		scanSchedulingLoopStop = true;
+		avDown = true;
+	}
+	schedulingLoopCondition.notify_one();
+	scanThread->join();
+	delete scanThread;
+
+	if (notifyThread) {
+		verifyNotifier.notify_one();
+		delete notifyThread;
+	}
+}
+
+void FileScanner::wakeupScanThead() {
+	{
+		std::lock_guard<std::mutex> l(scanSchedulingMutex);
+		scanSchedulingLoopStop = true;
+	}
+	schedulingLoopCondition.notify_one();
+}
+
+template<class Duration>
+bool FileScanner::waitForScanThread(Duration duration) {
+	std::unique_lock<std::mutex> l(scanSchedulingMutex);
+	schedulingLoopCondition.wait_for(l, duration, [this]() { return scanSchedulingLoopStop; });
+	scanSchedulingLoopStop = false;
+}
+
 
 void FileScanner::init(IManager* manager, HMODULE module, IConfig* configManager)
 {
@@ -44,9 +151,9 @@ void FileScanner::init(IManager* manager, HMODULE module, IConfig* configManager
 	this->logger->log("FileScanner");
 	this->messageManager = manager->getMessageManager();
 	this->configManager = configManager;
-	std::vector<std::string> scanPaths = split(configManager->getStringParam("ScanPaths"), ";");
+	this->scanPath = split(configManager->getStringParam("ScanPaths"), ";");
 	this->rulesPath = configManager->getStringParam("RulesPath");
-	int scanPeriod = configManager->getDwordParam("ScanPeriod");
+	this->scanPeriod = configManager->getDwordParam("ScanPeriod");
 
 	this->logger->log("AVFileScanner | loading rules");
 
@@ -54,7 +161,10 @@ void FileScanner::init(IManager* manager, HMODULE module, IConfig* configManager
 	this->yara = newDetector();
 
 	manager->registerCallback(this, CallbackFileCreate, AvFileCreate, 100);
-
+	
+	this->scanThread = new std::thread([this]() { this->scanFiles(); });
+	//this->notifyThread = new std::thread([this]() { this->verifyFiles(); });
+	
 	this->logger->log("AVFileScanner | started");
 }
 
@@ -78,6 +188,7 @@ yaracpp::YaraDetector* FileScanner::newDetector() {
 
 void FileScanner::deinit()
 {
+	shutdownThreads();
 	delete yara;
 }
 
@@ -87,6 +198,9 @@ FileScanner::~FileScanner()
 
 int FileScanner::processCommand(std::string name, std::string args)
 {
+	if (name == "scan") {
+		this->wakeupScanThead();
+	} 
 	return 0;
 }
 
