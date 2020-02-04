@@ -45,11 +45,6 @@ void FileScanner::scanFiles() {
 	try {
 		while (!this->avDown) {
 			if (this->scannerInited) {
-
-				this->logger->log("FileScanner | start scanning in folders");
-				for (auto p : this->scanPath) {
-					this->logger->log("\t" + std::string(p));
-				}
 				WIN32_FIND_DATAA file;
 				std::stack<std::string, std::vector<std::string>> fstack(this->scanPath);
 				while (!fstack.empty()) {
@@ -60,7 +55,6 @@ void FileScanner::scanFiles() {
 						do {
 							std::string fname = std::string(file.cFileName);
 							std::string path = dir + "\\" + fname;
-							this->logger->log("FileScanner scan " + fname);
 							if (file.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
 								if ((fname != ".") && (fname != "..")) {
 									fstack.push(path);
