@@ -2,13 +2,14 @@
 
 using json = nlohmann::json;
 
-CloudScanner::CloudScanner(std::vector<std::string> scanPath, std::string skipListFile, int scanPeriod, int cuckooCheckPeriod, ILogger* logger) {
+CloudScanner::CloudScanner(std::vector<std::string> scanPath, std::string skipListFile, int scanPeriod, int cuckooCheckPeriod, ILogger* logger, IMessageManager* messageManager) {
 	this->scanPeriod = scanPeriod;
 	this->cuckooCheckPeriod = cuckooCheckPeriod;
 	this->scanPath = scanPath;
 	mutex = CreateMutex(NULL, FALSE, NULL);
 	this->readSkipFileHashes();
 	this->logger = logger;
+	this->messageManager = messageManager;
 }
 
 BOOL CloudScanner::run() {
@@ -29,7 +30,9 @@ void CloudScanner::stop() {
 
 BOOL CloudScanner::makeDecision(FileInfo *fileinfo) {
 	if (fileinfo->mlScore > 0.5 || fileinfo->cuckooScore > 5.0) {
-		DeleteFileA(fileinfo->path.c_str());
+		std::string message = "AVCloudScanner | malware detected | path: \'" + fileinfo->path + "\'";
+		this->logger->log(message);
+		this->messageManager->outAlert(message);
 		return TRUE;
 	}
 	else if (fileinfo->cuckooScore != -1) {
@@ -72,7 +75,7 @@ DWORD WINAPI CloudScanner::cuckooCheckResult(LPVOID lpParam) {
 
 DWORD WINAPI CloudScanner::scanFiles(LPVOID lpParam) {
 	CloudScanner* fs = (CloudScanner*)lpParam;
-
+	fs->logger->log("CloudScanner | scanFiles enter");
 	try {
 		while (!fs->avDown) {
 			WIN32_FIND_DATAA file;
@@ -94,7 +97,7 @@ DWORD WINAPI CloudScanner::scanFiles(LPVOID lpParam) {
 						else {
 							DWORD binaryType;
 							FILETIME lastModified = file.ftLastWriteTime;
-							if (/*GetBinaryTypeA(path.c_str(), &binaryType) && */(CompareFileTime(&lastModified, &fs->lastScanTime) >= 0)) {
+							if (GetBinaryTypeA(path.c_str(), &binaryType) && (CompareFileTime(&lastModified, &fs->lastScanTime) >= 0)) {
 								FileInfo info;
 								if (fs->sendFileToAnalyse(path, &info)) {
 									fs->makeDecision(&info);
@@ -109,7 +112,7 @@ DWORD WINAPI CloudScanner::scanFiles(LPVOID lpParam) {
 			SYSTEMTIME systemTime;
 			GetSystemTime(&systemTime);
 			SystemTimeToFileTime(&systemTime, &fs->lastScanTime);
-			Sleep(fs->scanPeriod);
+			Sleep(fs->scanPeriod * 60000);
 		}
 	} catch (int e) {
 		fs->logger->log("AVCloud | scanFiles exception");

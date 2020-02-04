@@ -25,5 +25,6 @@ private:
 	HMODULE module;
 	IConfig* configManager;
 	ILogger* logger;
+	IMessageManager* messageManager;
 	CloudScanner* cloudScanner = NULL;
 };

@@ -23,6 +23,7 @@ void CloudPlugin::init(IManager* manager, HMODULE module, IConfig* config)
 	this->logger = manager->getLogger();
 	this->logger->log("CloudPlugin");
 	this->configManager = config;
+	this->messageManager = manager->getMessageManager();
 	std::vector<std::string> scanPaths = split(config->getStringParam("ScanPaths"), ";");
 	std::string filesScanned = config->getStringParam("ScannedFiles");
 	int scanPeriod = config->getDwordParam("ScanPeriod");
@@ -31,8 +32,8 @@ void CloudPlugin::init(IManager* manager, HMODULE module, IConfig* config)
 	for (auto s : scanPaths)
 		this->logger->log(s);
 	this->logger->log(filesScanned);
-	cloudScanner = new CloudScanner(scanPaths, filesScanned, scanPeriod, cuckooScanPeriod, this->logger);
-	//cloudScanner->run();
+	cloudScanner = new CloudScanner(scanPaths, filesScanned, scanPeriod, cuckooScanPeriod, this->logger, this->messageManager);
+	cloudScanner->run();
 }
 
 void CloudPlugin::deinit()
